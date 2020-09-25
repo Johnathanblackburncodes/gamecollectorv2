@@ -1,0 +1,91 @@
+{% extends 'base.html' %} {% block content %}
+
+<h1>Platform Details</h1>
+
+<div class="row">
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">{{ platform.name }}</span>
+        <p>Release Year: {{ platform.release_year }}</p>
+      </div>
+      <div class="card-action">
+        <a href="{% url 'platforms_update' platform.id %}">Edit</a>
+        <a href="{% url 'platforms_delete' platform.id %}">Delete</a>
+      </div>
+    </div>
+    {% for photo in platform.photo_set.all %}
+    <img class="responsive-img card-panel" src="{{photo.url}}">
+    {% empty %}
+    <div class="card-panel teal-text center-align">No Photos Uploaded</div>
+    {% endfor %}
+    <form action="{% url 'add_photo' platform.id %}" enctype="multipart/form-data" method="POST" class="card-panel">
+      {% csrf_token %}
+      <input type="file" name="photo-file">
+      <br><br>
+      <input type="submit" class="btn" value="Upload Photo">
+    </form>
+  </div>
+  <div class="col s6">
+    <form action="{% url 'add_game' platform.id %}" method="post">
+      {% csrf_token %} {{ game_form.as_p }}
+      <input type="submit" class="btn" value="Add Game" />
+    </form>
+    <table class="striped">
+      <thead>
+        <tr>
+          <th>Game</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for game in platform.game_set.all %}
+        <tr>
+          <td>{{game.name}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s6">
+    <h3>{{ platform.name }}'s Platforms</h3>
+    {% if platform.controllers.count %}
+    {% for controller in platform.controllers.all %}
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">
+          A <span style="color: {{ controller.color }}">{{ controller.color }}</span> {{ controller.name }}
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <h5>No controllers :(</h5>
+    {% endif %}
+  </div>
+  <!-- Available toys will come after this line -->
+  <h3>Available Controllers</h3>
+  {% if contollers.count %}
+  {% for controller in controllers.all %}
+  <div class="card">
+    <div class="card-content">
+      <span class="card-title">
+        A <span style="color: {{ controller.color }}">{{ controller.color }}</span> {{ controller.name }}
+      </span>
+    </div>
+    <div class="card-action">
+      <form action="{% url 'assoc_controller' platform.id platform.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn">Add</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <h5>{{platform.name}} Already Has All Controllers Available</h5>
+  {% endif %}
+</div>
+
+{% endblock %}
